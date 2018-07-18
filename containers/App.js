@@ -22,7 +22,7 @@ export default class App extends Component {
     }
 
     componentDidMount() {
-      var demoColorPicker = new iro.ColorPicker("#color-picker-container", {
+      var colorPicker = new iro.ColorPicker("#color-picker-container", {
         width: 400,
         height: 400,
         color: {r: 93, g: 0, b: 255},
@@ -34,7 +34,7 @@ export default class App extends Component {
         borderColor: "#fff",
         anticlockwise: true,
       });
-      this.demoColorPicker = demoColorPicker;
+      this.colorPicker = colorPicker;
 
       var myFunc = function(color, changes) {
       // Log the color's hex RGB value to the dev console
@@ -42,7 +42,7 @@ export default class App extends Component {
         this.changeTargetColor(color.hexString);
       };
       myFunc = myFunc.bind(this);
-      demoColorPicker.on("color:change", myFunc);
+      colorPicker.on("color:change", myFunc);
     }
 
     setInks(inks) {
@@ -58,7 +58,7 @@ export default class App extends Component {
       this.setState({ targetColor: colorValue});
       console.log("Changed color state:" + this.state.targetColor);
 
-      this.buildInkData();
+      this.buildInkData(colorValue);
     }
 
     colorDistance(color1, color2) {
@@ -97,14 +97,23 @@ export default class App extends Component {
         } : null;
     }
 
-    buildInkData () {
+    handleClick (color, e) {
+      console.log("Clicked on " + color);
+      this.colorPicker.color.rgb = this.hexToRgb(color);
+    }
+
+    buildInkData (colorValue) {
       // var it = makeIterator(this.rawData);
-      console.log("Assembling inks...")
+      var color = this.state.targetColor;
+      if (colorValue != null) {
+        color = colorValue;
+      }
+      console.log("Sorting inks around " + color);
       //console.log(this.rawData())
       var inkArray = Array.from(this.rawData())
       var computeDistances = function (value) {
         //console.log(value)
-        value.distance = this.colorDistance(value.colorInformation.colors[0], this.hexToRgb(this.state.targetColor))
+        value.distance = this.colorDistance(value.colorInformation.colors[0], this.hexToRgb(color))
         //console.log("Distance "+ value.distance + " for "+ value.inkname);
       };
       computeDistances = computeDistances.bind(this);
@@ -132,7 +141,7 @@ export default class App extends Component {
     }
 
     componentWillUnmount() {
-      // this.demoColorPicker.off("color:change")
+      // this.colorPicker.off("color:change")
     }
 
     render () {
@@ -160,19 +169,13 @@ export default class App extends Component {
                     //console.log("ink " + ink.inkname + " index " + index);
                     var swatch = swatches[index];
                     if (ink != null) {
-                      return <Swatch key={index} color={swatch} label={ink.company + "\n" + ink.inkname}></Swatch>
+                      return <Swatch key={index} color={swatch} label={ink.company + "\n" + ink.inkname} onClick={(e) => this.handleClick(swatch, e)}></Swatch>
                         //return <div key={index} className={styles.swatch} style={{backgroundColor: swatch}}>{ink.company + "\n" + ink.inkname}</div>
                     }
-                })
+                }, this)
               }
             </div>
             <div id="color-picker-container" className={styles.color_picker_container}></div>
-
-            <div className={styles.color_picker_text}>
-                <div style={{width: "50px", height: "50px"}}>
-                  <div className={styles.color_picker_swatch} style={{backgroundColor: this.state.targetColor}}>{this.state.targetColor}</div>
-                </div>
-            </div>
 
             <div className={styles.footer}>
             Ink information comes from inkdb. For more information visit <a href="https://github.com/Pomax/inkdb-data">inkdb on github</a>. inkdb is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Attribution-ShareAlike 4.0 International</a> license and is used without modification.
