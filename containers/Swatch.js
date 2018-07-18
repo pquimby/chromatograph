@@ -16,9 +16,10 @@ export default class App extends Component {
 
   render() {
     return (
-      <div className={styles.swatch_container}>
+      <div className={styles.swatch_container} onClick={this.props.onClick}>
           <div className={styles.swatch} style={{backgroundColor: this.props.color}}></div>
           <div className={styles.swatch_label}>{this.props.label}</div>
+          <div className={styles.swatch_label}>{this.props.color}</div>
       </div>
     )
   }
